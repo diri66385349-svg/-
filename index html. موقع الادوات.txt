@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Tools Hub</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+
+    <style>
+        /* --- Global Styles --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: #f4f7f6; color: #333; line-height: 1.6; }
+        
+        /* --- Navigation --- */
+        nav { background: #fff; padding: 1rem 2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        nav .brand { font-size: 1.5rem; font-weight: bold; color: #2563eb; cursor: pointer; }
+        nav .links button { background: none; border: none; font-size: 1rem; color: #555; font-weight: 600; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        nav .links button.active, nav .links button:hover { background: #2563eb; color: #fff; }
+        @media (max-width: 768px) { nav { flex-direction: column; text-align: center; } }
+
+        /* --- Page Container --- */
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .container { max-width: 800px; margin: 3rem auto; padding: 0 1rem; }
+        .card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        h1, h2 { color: #1e293b; margin-bottom: 1.5rem; text-align: center; }
+
+        /* --- Forms & Inputs --- */
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #475569; }
+        input[type="text"], input[type="number"], select, input[type="file"], input[type="range"] { 
+            width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 1rem; outline: none; background: #fff;
+        }
+        input:focus, select:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.2); }
+        
+        /* --- Buttons --- */
+        .btn-group { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; margin-top: 1rem;}
+        button.action-btn { width: 100%; padding: 0.75rem; border: none; border-radius: 6px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; color: white; background: #2563eb; margin-top: 0.5rem; }
+        button.action-btn:hover { background: #1d4ed8; }
+        button.action-btn.danger { background: #ef4444; }
+        button.action-btn.danger:hover { background: #dc2626; }
+        button.action-btn.success { background: #10b981; }
+        button.action-btn.success:hover { background: #059669; }
+        button.action-btn.secondary { background: transparent; color: #2563eb; border: 2px solid #2563eb; }
+        button.action-btn.secondary:hover { background: #eff6ff; }
+
+        /* --- Home Specific --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+        .home-card { background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; text-align: center; cursor: pointer; border: 1px solid #e2e8f0; }
+        .home-card:hover { transform: translateY(-5px); border-color: #2563eb; }
+        .home-card h3 { color: #2563eb; margin-bottom: 0.5rem; }
+
+        /* --- Tool Specific Styles --- */
+        #qrcode { margin: 1.5rem auto; display: flex; justify-content: center; padding: 1rem; background: #fff; border-radius: 8px; }
+        .upload-area { border: 2px dashed #2563eb; padding: 2rem; text-align: center; border-radius: 8px; cursor: pointer; background: #eff6ff; transition: 0.2s; margin-bottom: 1.5rem; }
+        .upload-area:hover { background: #dbeafe; }
+        .result-box { margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; word-break: break-all; display: none; }
+        .course-row { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+        @media (max-width: 600px) { .course-row { flex-wrap: wrap; } }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="brand" onclick="navigate('home')">Smart Tools Hub</div>
+    <div class="links" id="nav-links">
+        <button class="active" onclick="navigate('home')">Home</button>
+        <button onclick="navigate('qr-gen')">QR Gen</button>
+        <button onclick="navigate('qr-read')">QR Read</button>
+        <button onclick="navigate('bmi')">BMI</button>
+        <button onclick="navigate('gpa')">GPA</button>
+        <button onclick="navigate('image-tools')">Image Tools</button>
+    </div>
+</nav>
+
+<div id="home" class="page-section active container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome to Smart Tools Hub</h1>
+        <p style="color: #64748b; font-size: 1.1rem;">A collection of free, fast, and completely offline-capable tools.</p>
+    </div>
+    <div class="grid">
+        <div class="home-card" onclick="navigate('qr-gen')">
+            <h3>📱 QR Generator</h3><p>Convert URLs or text into a downloadable QR code.</p>
+        </div>
+        <div class="home-card" onclick="navigate('qr-read')">
+            <h3>📷 QR Reader</h3><p>Upload a QR code image to decode and extract links.</p>
+        </div>
+        <div class="home-card" onclick="navigate('bmi')">
+            <h3>⚖️ BMI Calculator</h3><p>Check your Body Mass Index quickly.</p>
+        </div>
+        <div class="home-card" onclick="navigate('gpa')">
+            <h3>🎓 GPA Calculator</h3><p>Calculate your semester GPA dynamically.</p>
+        </div>
+        <div class="home-card" onclick="navigate('image-tools')">
+            <h3>🖼️ Image Tools</h3><p>Convert and compress images locally.</p>
+        </div>
+    </div>
+</div>
+
+<div id="qr-gen" class="page-section container" style="max-width: 600px;">
+    <div class="card">
+        <h1>Generate QR Code</h1>
+        <input type="text" id="qrText" placeholder="Enter URL or text here...">
+        <div class="btn-group">
+            <button class="action-btn" onclick="generateQR()">Generate</button>
+            <button class="action-btn danger" onclick="clearQR()">Clear</button>
+        </div>
+        <div id="qrcode"></div>
+        <button id="downloadBtn" class="action-btn success" style="display: none;" onclick="downloadQR()">Download QR as PNG</button>
+    </div>
+</div>
+
+<div id="qr-read" class="page-section container" style="max-width: 600px;">
+    <div class="card">
+        <h1>Read QR Code</h1>
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <p style="color: #1e40af; font-weight: bold;">Click to Upload or Drag & Drop Image</p>
+            <input type="file" id="fileInput" style="display:none;" accept="image/*" onchange="handleFile(event)">
+        </div>
+        <canvas id="qrCanvas" style="display:none;"></canvas>
+        <div class="result-box" id="resultBox">
+            <h3 style="color: #64748b; font-size: 1rem; margin-bottom: 0.5rem;">Decoded Result:</h3>
+            <div id="resultContent" style="font-size: 1.1rem; font-weight: 500;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="bmi" class="page-section container" style="max-width: 500px;">
+    <div class="card">
+        <h1>BMI Calculator</h1>
+        <div class="form-group">
+            <label>Weight (kg)</label>
+            <input type="number" id="weight" placeholder="e.g. 70" step="0.1" min="1">
+        </div>
+        <div class="form-group">
+            <label>Height (cm)</label>
+            <input type="number" id="height" placeholder="e.g. 175" step="0.1" min="1">
+        </div>
+        <button class="action-btn" onclick="calculateBMI()">Calculate BMI</button>
+        <div id="bmiResultArea" style="margin-top: 1.5rem; padding: 1.5rem; border-radius: 8px; text-align: center; display: none; color: white;">
+            <div id="bmiValue" style="font-size: 2.5rem; font-weight: bold;"></div>
+            <div id="bmiCategory" style="font-size: 1.2rem; font-weight: 600; text-transform: uppercase;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="gpa" class="page-section container" style="max-width: 700px;">
+    <div class="card">
+        <h1>GPA Calculator</h1>
+        <div id="courseList">
+            <div class="course-row">
+                <input type="text" placeholder="Subject (Optional)" class="course-name">
+                <input type="number" placeholder="Credits" class="course-credits" min="1" max="10">
+                <select class="course-grade">
+                    <option value="" disabled selected>Grade</option>
+                    <option value="4.0">A (4.0)</option>
+                    <option value="3.0">B (3.0)</option>
+                    <option value="2.0">C (2.0)</option>
+                    <option value="1.0">D (1.0)</option>
+                    <option value="0.0">F (0.0)</option>
+                </select>
+                <button class="action-btn danger" style="width: auto; margin-top: 0;" onclick="this.parentElement.remove()">X</button>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="action-btn secondary" onclick="addCourse()">+ Add Course</button>
+            <button class="action-btn" onclick="calculateGPA()">Calculate</button>
+        </div>
+        <div id="gpaResult" class="result-box" style="text-align: center;">
+            <h2 style="margin-bottom: 0;">Your Semester GPA</h2>
+            <span id="gpaScore" style="font-size: 2.5rem; color: #2563eb; font-weight: bold;">0.00</span>
+            <p style="color:#64748b;">Total Credits: <b id="totalCredits">0</b></p>
+        </div>
+    </div>
+</div>
+
+<div id="image-tools" class="page-section container">
+    <div class="grid">
+        <div class="card">
+            <h2>🔄 Image Converter</h2>
+            <div class="form-group">
+                <label>Upload Image</label>
+                <input type="file" id="convInput" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Convert To</label>
+                <select id="convFormat">
+                    <option value="image/png">PNG</option>
+                    <option value="image/jpeg">JPG / JPEG</option>
+                    <option value="image/webp">WEBP</option>
+                </select>
+            </div>
+            <button class="action-btn" onclick="convertImage()">Convert</button>
+            <button id="convDownload" class="action-btn success" style="display: none;">Download</button>
+        </div>
+        <div class="card">
+            <h2>🗜️ Image Compressor</h2>
+            <div class="form-group">
+                <label>Upload Image (JPG/WEBP)</label>
+                <input type="file" id="compInput" accept="image/jpeg, image/webp">
+            </div>
+            <div class="form-group">
+                <label>Quality: <span id="qualityVal">70%</span></label>
+                <input type="range" id="compQuality" min="0.1" max="1" step="0.1" value="0.7" oninput="document.getElementById('qualityVal').innerText = Math.round(this.value * 100) + '%'">
+            </div>
+            <button class="action-btn" onclick="compressImage()">Compress</button>
+            <div id="compResult" style="margin-top: 1rem; color: #10b981; font-weight: bold
